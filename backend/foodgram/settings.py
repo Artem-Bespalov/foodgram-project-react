@@ -9,7 +9,7 @@ SECRET_KEY = (
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -20,7 +20,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "corsheaders",
     "djoser",
+    "django_filters",
     "import_export",
     "api.apps.ApiConfig",
     "recipes.apps.RecipesConfig",
@@ -30,6 +32,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -102,11 +105,14 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_PAGINATION_CLASS": [
+        "api.pagination.MyPaginator",
     ],
 }
 
@@ -118,7 +124,16 @@ DJOSER = {
     },
     "PERMISSIONS": {
         "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
-        "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
+        "user_list": ["rest_framework.permissions.AllowAny"],
     },
     "HIDE_USERS": False,
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+CORS_URLS_REGEX = r"^/api/.*$"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+]

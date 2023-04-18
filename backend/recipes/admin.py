@@ -3,11 +3,11 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from .models import (
-    Favourite,
+    Favorite,
     Ingredient,
     IngredientInRecipe,
     Recipe,
-    ShoppingList,
+    ShoppingCart,
     Tag,
 )
 
@@ -30,7 +30,7 @@ class TagAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(ShoppingList)
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         "user",
@@ -38,8 +38,8 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Favourite)
-class FavouriteAdmin(admin.ModelAdmin):
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "recipe",
