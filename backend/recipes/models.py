@@ -43,7 +43,6 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
         constraints = (
@@ -189,6 +188,7 @@ class ShoppingCart(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         verbose_name="Рецепт",
+        related_name="in_shopping_cart",
     )
 
     class Meta:

@@ -202,8 +202,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return RecipeReadSerializer(instance, context=self.context).data
 
 
-class ReadRecipeForFollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для раздела 'Мои подписки'"""
+class StrippedRecipeSerializer(serializers.ModelSerializer):
+    """Укороченное представление рецепта"""
 
     image = Base64ImageField()
 
@@ -250,7 +250,7 @@ class FollowSerializer(CustomUserSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[: int(limit)]
-        serializer = ReadRecipeForFollowSerializer(
+        serializer = StrippedRecipeSerializer(
             recipes, many=True, read_only=True
         )
         return serializer.data
