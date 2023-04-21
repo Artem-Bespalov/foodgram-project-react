@@ -3,8 +3,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = (
-    "django-insecure-u*p4e-f2-ec$zr0=u72_szsqhj0t0b=eor7v=a0+(qnl=q(4s7"
+
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    default="django-insecure-u*p4e-f2-ec$zr0=u72_szsqhj0t0b=eor7v=a0+(qnl=q(4s7",
 )
 
 DEBUG = True
