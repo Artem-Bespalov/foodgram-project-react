@@ -8,19 +8,11 @@ from api.serializers import (
     StrippedRecipeSerializer,
     TagSerializer,
 )
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    ShoppingCart,
-    Tag,
-)
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
@@ -130,7 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=True,
+        detail=False,
         methods=["post", "delete"],
         permission_classes=[IsAuthenticated],
     )
@@ -146,3 +138,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == "DELETE":
             ShoppingCart.objects.get(user=request.user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+    )
+    def download_shopping_cart(self, request):
+        recipe_id = request.user.shopping_cart.values_list("recipe", flat=True)
+        ingredients = list(
+            Recipe.objects.filter(id__in=recipe_id).values_list(
+                "recipe_ingredients__ingredient__name",
+                "recipe_ingredients__ingredient__measurement_unit",
+                "recipe_ingredients__amount",
+            )
+        )
+        data = {}
+        for ingredient in ingredients:
+            if ingredient[0] in data:
+                data[ingredient[0]][0] += ingredient[2]
+            else:
+                data[ingredient[0]] = [ingredient[2], ingredient[1]]
+        result = ""
+        for key in data:
+            result += f"{key}: {data[key][0]}{data[key][1]}\n"
+        response = HttpResponse(result, content_type="text/plain")
+        response["Content-Disposition"] = (
+            "attachment;" 'filename="shopping_list.txt"'
+        )
+        return response
