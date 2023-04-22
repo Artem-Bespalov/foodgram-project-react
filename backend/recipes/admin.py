@@ -12,6 +12,11 @@ from .models import (
 )
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = Recipe.ingredients.through
+    min_num = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -19,6 +24,7 @@ class RecipeAdmin(admin.ModelAdmin):
         "id",
         "author",
     )
+    inlines = (RecipeIngredientInline,)
 
 
 @admin.register(Tag)

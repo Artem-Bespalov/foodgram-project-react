@@ -1,5 +1,8 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -8,7 +11,6 @@ from recipes.models import (
     ShoppingCart,
     Tag,
 )
-from rest_framework import serializers
 from users.models import Follow, User
 
 
@@ -133,6 +135,17 @@ class IngredientInRecipeCreateSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
         fields = ("id", "amount")
 
+    def validate_amount(self, value):
+        if value <= 0:
+            raise ValidationError(
+                "Суммарный вес продукта должен быть минимум 1 грамм"
+            )
+        if value > 3000:
+            raise ValidationError(
+                "Суммарный вес продукта должен быть максимум 3000 грамм"
+            )
+        return value
+
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор записи и обновления рецептов"""
@@ -159,8 +172,25 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             "author",
         )
 
-    def add_tags_and_ingredients(self, recipe, tags, ingredients):
-        recipe.tags.set(tags)
+    def validate_cooking_time(self, value):
+        if value <= 0:
+            raise ValidationError("Минимальное время приготовления 1 минута")
+        if value > 600:
+            raise ValidationError("Максимальное время приготовления 600 минут")
+        return value
+
+    def validate_ingredients(self, value):
+        if not value:
+            raise ValidationError("Нужно добавить хотя бы один ингредиент")
+        ingredients = [item["id"] for item in value]
+        for ingredient in ingredients:
+            if ingredients.count(ingredient) > 1:
+                raise ValidationError(
+                    "У рецепта не может быть два одинаковых ингредиента"
+                )
+        return value
+
+    def add_ingredients(self, recipe, tags, ingredients):
         IngredientInRecipe.objects.bulk_create(
             [
                 IngredientInRecipe(
@@ -179,7 +209,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(
             author=self.context["request"].user, image=image, **validated_data
         )
-        self.add_tags_and_ingredients(recipe, tags, ingredients)
+        recipe.tags.set(tags)
+        self.add_ingredients(recipe, tags, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
@@ -191,10 +222,12 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         )
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
+        instance.tags.clear()
+        instance.tags.set(tags)
         IngredientInRecipe.objects.filter(
             recipe=instance, ingredient__in=instance.ingredients.all()
         ).delete()
-        self.add_tags_and_ingredients(instance, tags, ingredients)
+        self.add_ingredients(instance, tags, ingredients)
         instance.save()
         return instance
 

@@ -1,3 +1,12 @@
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.response import Response
+
 from api.permissions import AdminOrReadOnly, AuthorOrReadOnly
 from api.serializers import (
     CustomUserSerializer,
@@ -8,17 +17,8 @@ from api.serializers import (
     StrippedRecipeSerializer,
     TagSerializer,
 )
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
-from rest_framework.response import Response
 from users.models import Follow, User
-
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import MyPaginator
 
@@ -46,7 +46,7 @@ class UserViewSet(UserViewSet):
             serializer = FollowSerializer(
                 author, data=request.data, context={"request": request}
             )
-            serializer.is_valid()
+            serializer.is_valid(raise_exception=True)
             Follow.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -118,7 +118,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
         if request.method == "DELETE":
-            Favorite.objects.get(user=request.user, recipe=recipe).delete()
+            favorite = Favorite.objects.filter(
+                user=request.user, recipe=recipe
+            )
+            favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -135,8 +138,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 data=serializer.data, status=status.HTTP_201_CREATED
             )
+
         if request.method == "DELETE":
-            ShoppingCart.objects.get(user=request.user, recipe=recipe).delete()
+            shoppingcart = ShoppingCart.objects.filter(
+                user=request.user, recipe=recipe
+            )
+            shoppingcart.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(

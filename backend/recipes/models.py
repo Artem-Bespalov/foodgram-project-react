@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from users.models import User
 
@@ -23,6 +23,7 @@ class Tag(models.Model):
     )
 
     class Meta:
+        ordering = ["id"]
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
 
@@ -43,6 +44,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        ordering = ["id"]
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
         constraints = (
@@ -89,6 +91,9 @@ class Recipe(models.Model):
         default=1,
         validators=(
             MinValueValidator(1, "Минимальное время приготовления 1 минута"),
+            MaxValueValidator(
+                600, "Максимальное время приготовления 600 минут"
+            ),
         ),
     )
     image = models.ImageField(
@@ -118,13 +123,19 @@ class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        default=1,
         verbose_name="Рецепт",
         related_name="recipe_ingredients",
-        validators=[MinValueValidator(1, "Должен быть хотябы 1 ингредиент")],
     )
     amount = models.PositiveSmallIntegerField(
         "Количество",
+        validators=(
+            MinValueValidator(
+                1, "Суммарный вес продукта должен быть минимум 1 грамм"
+            ),
+            MaxValueValidator(
+                3000, "Суммарный вес продукта должен быть максимум 3000 грамм"
+            ),
+        ),
     )
 
     class Meta:
@@ -162,6 +173,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        ordering = ["-id"]
         verbose_name = "Избранное"
         verbose_name_plural = "Избранное"
         constraints = [
@@ -192,6 +204,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ["-id"]
         verbose_name = "Список покупок"
         verbose_name_plural = "Списки покупок"
         constraints = [
