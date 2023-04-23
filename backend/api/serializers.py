@@ -3,6 +3,12 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from foodgram.settings import (
+    MAX_COOKING_TIME,
+    MIN_COOKING_TIME,
+    MAX_AMOUNT_WEIGHT_PRODUCT,
+    MIN_AMOUNT_WEIGHT_PRODUCT,
+)
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -47,9 +53,9 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get("request").user
-        if user.is_anonymous:
-            return False
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return (
+            user.is_authenticated and obj.following.filter(user=user).exists()
+        )
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -109,20 +115,24 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
 
-    def get_is_favorited(self, obj):
+    def get_is_subscribed(self, obj):
+        user = self.context.get("request").user
         return (
-            self.context.get("request").user.is_authenticated
-            and Favorite.objects.filter(
-                user=self.context["request"].user, recipe=obj
-            ).exists()
+            user.is_authenticated and obj.following.filter(user=user).exists()
+        )
+
+    def get_is_favorited(self, obj):
+        user = self.context.get("request").user
+        return (
+            user.is_authenticated
+            and obj.in_favorite.filter(user=user).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
+        user = self.context.get("request").user
         return (
-            self.context.get("request").user.is_authenticated
-            and ShoppingCart.objects.filter(
-                user=self.context["request"].user, recipe=obj
-            ).exists()
+            user.is_authenticated
+            and obj.in_shopping_cart.filter(user=user).exists()
         )
 
 
@@ -136,11 +146,11 @@ class IngredientInRecipeCreateSerializer(serializers.ModelSerializer):
         fields = ("id", "amount")
 
     def validate_amount(self, value):
-        if value <= 0:
+        if value <= MIN_AMOUNT_WEIGHT_PRODUCT:
             raise ValidationError(
                 "Суммарный вес продукта должен быть минимум 1 грамм"
             )
-        if value > 3000:
+        if value > MAX_AMOUNT_WEIGHT_PRODUCT:
             raise ValidationError(
                 "Суммарный вес продукта должен быть максимум 3000 грамм"
             )
@@ -173,9 +183,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         )
 
     def validate_cooking_time(self, value):
-        if value <= 0:
+        if value <= MIN_COOKING_TIME:
             raise ValidationError("Минимальное время приготовления 1 минута")
-        if value > 600:
+        if value > MAX_COOKING_TIME:
             raise ValidationError("Максимальное время приготовления 600 минут")
         return value
 
@@ -183,11 +193,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise ValidationError("Нужно добавить хотя бы один ингредиент")
         ingredients = [item["id"] for item in value]
-        for ingredient in ingredients:
-            if ingredients.count(ingredient) > 1:
-                raise ValidationError(
-                    "У рецепта не может быть два одинаковых ингредиента"
-                )
+        if len(ingredients) != len(set(ingredients)):
+            raise ValidationError(
+                "У рецепта не может быть два одинаковых ингредиента"
+            )
         return value
 
     def add_ingredients(self, recipe, tags, ingredients):
@@ -274,8 +283,10 @@ class FollowSerializer(CustomUserSerializer):
         return obj.recipes.count()
 
     def get_is_subscribed(self, obj):
-        request = self.context.get("request")
-        return Follow.objects.filter(user=request.user, author=obj).exists()
+        user = self.context.get("request").user
+        return (
+            user.is_authenticated and obj.following.filter(user=user).exists()
+        )
 
     def get_recipes(self, obj):
         request = self.context.get("request")

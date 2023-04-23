@@ -1,6 +1,13 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from users.models import User
+from foodgram.settings import (
+    MAX_COOKING_TIME,
+    MIN_COOKING_TIME,
+    DEFAULT_COOKING_TIME,
+    MAX_AMOUNT_WEIGHT_PRODUCT,
+    MIN_AMOUNT_WEIGHT_PRODUCT,
+)
 
 
 class Tag(models.Model):
@@ -44,7 +51,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["name"]
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
         constraints = (
@@ -88,11 +95,13 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name="Время приготовления",
-        default=1,
+        default=DEFAULT_COOKING_TIME,
         validators=(
-            MinValueValidator(1, "Минимальное время приготовления 1 минута"),
+            MinValueValidator(
+                MIN_COOKING_TIME, "Минимальное время приготовления 1 минута"
+            ),
             MaxValueValidator(
-                600, "Максимальное время приготовления 600 минут"
+                MAX_COOKING_TIME, "Максимальное время приготовления 600 минут"
             ),
         ),
     )
@@ -130,16 +139,18 @@ class IngredientInRecipe(models.Model):
         "Количество",
         validators=(
             MinValueValidator(
-                1, "Суммарный вес продукта должен быть минимум 1 грамм"
+                MIN_AMOUNT_WEIGHT_PRODUCT,
+                "Суммарный вес продукта должен быть минимум 1 грамм",
             ),
             MaxValueValidator(
-                3000, "Суммарный вес продукта должен быть максимум 3000 грамм"
+                MAX_AMOUNT_WEIGHT_PRODUCT,
+                "Суммарный вес продукта должен быть максимум 3000 грамм",
             ),
         ),
     )
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["ingredient__name"]
         verbose_name = "Количество ингридиента"
         verbose_name_plural = "Количество ингридиентов"
         constraints = (
@@ -173,7 +184,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["recipe__name"]
         verbose_name = "Избранное"
         verbose_name_plural = "Избранное"
         constraints = [
@@ -204,7 +215,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["recipe__name"]
         verbose_name = "Список покупок"
         verbose_name_plural = "Списки покупок"
         constraints = [

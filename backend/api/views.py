@@ -20,7 +20,7 @@ from api.serializers import (
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from users.models import Follow, User
 from .filters import IngredientFilter, RecipeFilter
-from .pagination import MyPaginator
+from .pagination import PageLimitPaginator
 
 
 class UserViewSet(UserViewSet):
@@ -30,7 +30,7 @@ class UserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = MyPaginator
+    pagination_class = PageLimitPaginator
 
     @action(
         detail=True,
@@ -92,7 +92,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Recipe.objects.all()
-    pagination_class = MyPaginator
+    pagination_class = PageLimitPaginator
     permission_classes = (AuthorOrReadOnly,)
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter

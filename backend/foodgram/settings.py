@@ -1,6 +1,13 @@
 import os
 from pathlib import Path
 
+MAX_COOKING_TIME = 600
+MIN_COOKING_TIME = 1
+DEFAULT_COOKING_TIME = 1
+MAX_AMOUNT_WEIGHT_PRODUCT = 3000
+MIN_AMOUNT_WEIGHT_PRODUCT = 1
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -112,7 +119,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
     "DEFAULT_PAGINATION_CLASS": [
-        "api.pagination.MyPaginator",
+        "api.pagination.PageLimitPaginator",
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
