@@ -11,20 +11,16 @@ class User(AbstractUser):
     )
     username = models.CharField(
         "Логин",
-        max_length=150,
         unique=True,
     )
     password = models.CharField(
         "Пароль",
-        max_length=20,
     )
     first_name = models.CharField(
         "Имя",
-        max_length=50,
     )
     last_name = models.CharField(
         "Фамилия",
-        max_length=50,
     )
 
     USERNAME_FIELD = "email"

@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv(
     default="django-insecure-u*p4e-f2-ec$zr0=u72_szsqhj0t0b=eor7v=a0+(qnl=q(4s7",
 )
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -71,9 +71,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
 
@@ -138,11 +142,11 @@ DJOSER = {
     },
 }
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-CORS_URLS_REGEX = r"^/api/.*$"
+# INTERNAL_IPS = [
+#     "127.0.0.1",
+# ]
+# CORS_URLS_REGEX = r"^/api/.*$"
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:3000",
+# ]
