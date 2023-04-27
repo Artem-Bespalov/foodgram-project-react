@@ -1,20 +1,10 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from foodgram.settings import (MAX_AMOUNT_WEIGHT_PRODUCT, MAX_COOKING_TIME,
+                               MIN_AMOUNT_WEIGHT_PRODUCT, MIN_COOKING_TIME)
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from foodgram.settings import (
-    MAX_COOKING_TIME,
-    MIN_COOKING_TIME,
-    MAX_AMOUNT_WEIGHT_PRODUCT,
-    MIN_AMOUNT_WEIGHT_PRODUCT,
-)
-from recipes.models import (
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    Tag,
-)
 from users.models import Follow, User
 
 
