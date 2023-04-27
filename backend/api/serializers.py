@@ -10,11 +10,9 @@ from foodgram.settings import (
     MIN_AMOUNT_WEIGHT_PRODUCT,
 )
 from recipes.models import (
-    Favorite,
     Ingredient,
     IngredientInRecipe,
     Recipe,
-    ShoppingCart,
     Tag,
 )
 from users.models import Follow, User
