@@ -58,8 +58,8 @@ jobs:
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
           sudo docker-compose down
-          sudo docker-compose rm artembespalov/backend_foodgram
-          sudo docker-compose rm artembespalov/frontend_foodgram
+          sudo docker-compose rm artembespalov/backend_foodgram:latest
+          sudo docker-compose rm artembespalov/frontend_foodgram:latest
           sudo rm .env
           touch .env
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -81,4 +81,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: ${{ github.workflow }} успешно выполнен!!!
+        message: ${{ github.workflow }} успешно выполнен!!
