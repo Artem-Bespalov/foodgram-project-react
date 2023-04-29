@@ -1,7 +1,6 @@
+from django.conf import settings
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from foodgram.settings import (MAX_AMOUNT_WEIGHT_PRODUCT, MAX_COOKING_TIME,
-                               MIN_AMOUNT_WEIGHT_PRODUCT, MIN_COOKING_TIME)
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -134,11 +133,11 @@ class IngredientInRecipeCreateSerializer(serializers.ModelSerializer):
         fields = ("id", "amount")
 
     def validate_amount(self, value):
-        if value <= MIN_AMOUNT_WEIGHT_PRODUCT:
+        if value <= settings.MIN_AMOUNT_WEIGHT_PRODUCT:
             raise ValidationError(
                 "Суммарный вес продукта должен быть минимум 1 грамм"
             )
-        if value > MAX_AMOUNT_WEIGHT_PRODUCT:
+        if value > settings.MAX_AMOUNT_WEIGHT_PRODUCT:
             raise ValidationError(
                 "Суммарный вес продукта должен быть максимум 3000 грамм"
             )
@@ -171,9 +170,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         )
 
     def validate_cooking_time(self, value):
-        if value <= MIN_COOKING_TIME:
+        if value <= settings.MIN_COOKING_TIME:
             raise ValidationError("Минимальное время приготовления 1 минута")
-        if value > MAX_COOKING_TIME:
+        if value > settings.MAX_COOKING_TIME:
             raise ValidationError("Максимальное время приготовления 600 минут")
         return value
 
