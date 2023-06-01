@@ -12,12 +12,6 @@
 ![Docker](https://img.shields.io/badge/Docker-green)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-green)
 
-### Проект доступен по адресу:
-<a href="http://62.84.119.176/recipes">Продуктовый помощник</a>
-
-### Документация проекта:
-<a href="http://62.84.119.176/api/docs/">Документация</a>
-
 ### Как запустить проект:
 
 Клонировать репозиторий и перейти в него в командной строке:
